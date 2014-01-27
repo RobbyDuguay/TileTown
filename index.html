@@ -1,0 +1,153 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>This is made of tiles or whatever</title>
+  <script type="text/javascript" src="../daimio_composite.js"></script>
+</head>
+<body id="body">
+
+  <div id="display"></div>
+  <div id="display-overlay"></div>
+  <div id="display-character"></div>
+
+  
+<script type="text/daimio" class="spaceseeds">
+    outer
+
+      // INIT
+      @init from-js
+      @create-overlay from-js
+      
+      @keyboard dom-on-keypress body
+      @keyboard -> {__.which |tap} -> keypress-sorter -> draw-character
+      
+      keypress-sorter
+        {__ | switch (
+                97 "{$left | subtract 1 | max 0 | >$left}"
+                115 "{$top | subtract 1 | max 0| >$top}"
+                100 "{$left | add 1 | min 23 | >$left}"
+                119 "{$top | add 1 | min 15 | >$top}"
+              ) 
+        | run}
+      
+      $top 15
+      
+      $left 0
+      
+      // IMAGE MAP
+      make-image-map
+        {* (
+          0  "http://www.robbyduguay.com/Pictures/TileTown/0.png"
+          1  "http://www.robbyduguay.com/Pictures/TileTown/1.png"
+          2  "http://www.robbyduguay.com/Pictures/TileTown/2.png"
+          3  "http://www.robbyduguay.com/Pictures/TileTown/3.png"
+          4  "http://www.robbyduguay.com/Pictures/TileTown/4.png"
+          5  "http://www.robbyduguay.com/Pictures/TileTown/5.png"
+          6  "http://www.robbyduguay.com/Pictures/TileTown/6.png"
+          7  "http://www.robbyduguay.com/Pictures/TileTown/7.png"
+          8  "http://www.robbyduguay.com/Pictures/TileTown/8.png"
+          9  "http://www.robbyduguay.com/Pictures/TileTown/9.png"
+          :A "http://www.robbyduguay.com/Pictures/TileTown/10.png"
+          :B "http://www.robbyduguay.com/Pictures/TileTown/11.png"
+          :C "http://www.robbyduguay.com/Pictures/TileTown/12.png"
+          :D "http://www.robbyduguay.com/Pictures/TileTown/13.png"
+          :E "http://www.robbyduguay.com/Pictures/TileTown/14.png"
+          :F "http://www.robbyduguay.com/Pictures/TileTown/15.png"
+          :G "http://www.robbyduguay.com/Pictures/TileTown/16.png"
+          :H "http://www.robbyduguay.com/Pictures/TileTown/17.png"
+          :I "http://www.robbyduguay.com/Pictures/TileTown/18.png"
+          :J "http://www.robbyduguay.com/Pictures/TileTown/19.png"
+          :K "http://www.robbyduguay.com/Pictures/TileTown/20.png"
+          :L "http://www.robbyduguay.com/Pictures/TileTown/21.png"
+          :M "http://www.robbyduguay.com/Pictures/TileTown/22.png"
+          :N "http://www.robbyduguay.com/Pictures/TileTown/23.png"
+          :O "http://www.robbyduguay.com/Pictures/TileTown/24.png"
+          
+        ) | >$image-map
+        | __in}
+
+      make-image-map2
+        {* (
+          0  "http://www.robbyduguay.com/Pictures/blank.png"
+          1  "http://www.robbyduguay.com/Pictures/tree.png"
+          :A "asdf"
+        ) | >$image-map2
+        | __in}
+
+      
+      // MAP MUNGING
+      map-munger
+        { __ | string split on "~" | tap 
+        | map block "{__ | string split on ""}" 
+        | tap}
+
+      map-munger2
+        { __ | string split on "~" | tap 
+        | map block "{__ | string split on ""}" 
+        | tap}
+        
+      
+      @init -> make-image-map -> map-munger
+      @create-overlay -> make-image-map2 -> map-munger2
+      @init -> draw-character
+      
+      // OUTPUT
+      @display dom-set-html 
+      @display-overlay dom-set-html
+      @display-character dom-set-html
+
+      // DO SOMETHING
+      draw
+        <table cellspacing="0" cellpadding="0" style="position:absolute; top:0px; left:0px">
+          {begin rows | each data __in}
+            <tr style="height:64px; display:block;">
+              {begin columns | each data _value}
+                <td>
+                  <img src="{$image-map.{_value}}" height="64" width="64"> 
+                </td>
+              {end columns}
+            </tr>
+          {end rows}
+        </table>
+        
+      draw-overlay
+        <table cellspacing="0" cellpadding="0" style="position:absolute; top:0px; left:0px">
+          {begin rows | each data __in}
+            <tr style="height:64px; display:block;">
+              {begin columns | each data _value}
+                <td>
+                  <img src="{$image-map2.{_value}}" height="64" width="64"> 
+                </td>
+              {end columns}
+            </tr>
+          {end rows}
+        </table>
+
+      draw-character
+         <img src="http://www.robbyduguay.com/Pictures/lilhenry.png" height="64" width="64" style="position:absolute; top:{$top | subtract from 15 | times 64}px; left:{$left | times 64}px"> 
+
+      map-munger -> draw -> @display
+      
+      map-munger2 -> draw-overlay -> @display-overlay
+      
+      draw-character -> @display-character
+
+  </script>
+
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+      OuterSpace = D.make_me_a_space_as_fast_as_you_can() // published for debug
+      //python -m SimpleHTTPServer 8888 &
+      map = "000000000000000000000000~000000000000000000000000~000012222230000000000000~000045555560000000000000~000045555560000000000000~0000455555O2222300000000~000045555555555600000000~000045555555555600000000~0000788N5555555600000000~0000000455BCD55600000000~0000000455EFG55600000000~0000000455HIJ55600000000~000000045555555600000000~000000078888888900000000~000000000000000000000000~000000000000000000000000"
+      
+      map2 = "000000000000000000110000~000000000000001111110000~000000000001111110000100~000000000000001111111100~000000000000000001100000~000000000000000000000000~000000000000000000011000~000000000000000000111100~000000000000000000001000~000000000000000000000000~000000000000000000000000~000000000011111110000000~000000000000000000000000~000000000000000000000000~000000000000000011000000~000000000000001111100000"
+      
+      
+      D.send_value_to_js_port(OuterSpace, 'init', map)
+      D.send_value_to_js_port(OuterSpace, 'create-overlay', map2)
+    })
+  </script>
+
+</body>
+</html>
