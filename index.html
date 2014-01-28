@@ -7,11 +7,22 @@
 </head>
 <body id="body">
 
-  <div id="display"></div>
-  <div id="display-overlay"></div>
-  <div id="display-character"></div>
-
+  <div style="position:absolute; width:1000px; height:1000px;">
+    <div id="display"></div>
+    <div id="display-overlay"></div>
+    <div id="display-character"></div>
+  </div>
   
+  <form id="chatbox" style="position:absolute">
+    <input id="message" type="text" name="message">
+    <input type="submit">
+  </form>
+  
+  <div id="chat" style="position:absolute"></div>
+  
+  
+
+
 <script type="text/daimio" class="spaceseeds">
     outer
 
@@ -19,7 +30,7 @@
       @init from-js
       @create-overlay from-js
       
-      @keyboard dom-on-keypress body
+      @keyboard dom-on-keypress-on-body-no-forms body
       @keyboard -> {__.which |tap} -> keypress-sorter -> draw-character
       
       keypress-sorter
@@ -34,6 +45,12 @@
       $top 15
       
       $left 0
+      
+      // CHAT THING
+      @chat dom-set-text 
+      @chatbox dom-on-submit
+      @chatbox -> @chat
+      
       
       // IMAGE MAP
       make-image-map
@@ -147,6 +164,47 @@
       D.send_value_to_js_port(OuterSpace, 'init', map)
       D.send_value_to_js_port(OuterSpace, 'create-overlay', map2)
     })
+    
+    D.import_port_flavour('dom-on-keypress-on-body-no-forms', {
+      dir: 'in',
+      outside_add: function() {
+        var self = this
+        
+        document.addEventListener('keypress', function(event) {
+          var target = event.target
+          
+          if(/INPUT|TEXTAREA|BUTTON|SELECT/.test(target.nodeName)) 
+            return
+          
+          event.stopPropagation() // THINK: not sure these are always desired...
+          event.preventDefault()  //        maybe use a port param to allow passthru
+          self.enter(D.scrub_var(event))
+        }, false)
+      }
+    })
+    
+
+    D.import_models({
+      string: {
+        methods: {
+          "code-to-char": {
+            desc: 'String.fromCharCode',
+            params: [
+              {
+                key: 'value',
+                desc: 'A char code',
+                type: 'number',
+                required: true
+              },
+            ],
+            fun: function(value) {
+              return String.fromCharCode(value)
+            }
+          }
+        }
+      }
+    })
+
   </script>
 
 </body>
