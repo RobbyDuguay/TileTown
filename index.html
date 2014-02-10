@@ -13,14 +13,16 @@
     <div id="display-character"></div>
   </div>
   
-  <form id="chatbox" style="position:absolute">
-    <input id="message" type="text" name="message">
-    <input type="submit">
+  <form id="chatbox" style="position:absolute; width:20%; right:2%; bottom:5%;">
+    <input id="message" type="text" name="message" style="width:96%">
+    <input type="submit" style="float:right">
   </form>
   
-  <div id="chat" style="position:absolute"></div>
+  <div id="chatbackground" style="position:absolute; width:20%; right:2%; bottom:12%; height:85%; background-color:white; opacity:0.75;overflow-x:scroll;">
+  </div>
   
-  
+  <div id="display-chat" style="position:absolute; width:19.75%; right:2%; bottom:12%; height:85%; overflow-x:scroll; overflow-y:scroll;">
+  </div>
 
 
 <script type="text/daimio" class="spaceseeds">
@@ -49,7 +51,19 @@
       // CHAT THING
       @chat dom-set-text 
       @chatbox dom-on-submit
-      @chatbox -> @chat
+      @display-chat dom-set-html
+      @message dom-set-value
+      
+      make-chat-work
+        { __ | >$chat.#-0 }
+        
+      decorate-messages
+        {begin list | merge data $chat}
+          <p>{_message}</p>
+        {end list}
+
+      @chatbox -> make-chat-work -> decorate-messages -> @display-chat
+      @chatbox -> {""} -> @message
       
       
       // IMAGE MAP
