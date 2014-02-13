@@ -11,18 +11,19 @@
     <div id="display"></div>
     <div id="display-overlay"></div>
     <div id="display-character"></div>
+    <div id="display-character2"></div>
   </div>
   
   <form id="chatbox" style="position:absolute; width:20%; right:2%; bottom:5%;">
     <input id="message" type="text" name="message" style="width:96%">
+    <input id="user" type="text" name="user" style="width:96%" value="lil' 'enry">
     <input type="submit" style="float:right">
   </form>
   
-  <div id="chatbackground" style="position:absolute; width:20%; right:2%; bottom:12%; height:85%; background-color:white; opacity:0.75;overflow-x:scroll;">
+  <div id="chatbackground" style="position:absolute; width:20%; right:2%; bottom:12%; height:85%; background-color:white; opacity:0.75;">
   </div>
   
-  <div id="display-chat" style="position:absolute; width:19.75%; right:2%; bottom:12%; height:85%; overflow-x:scroll; overflow-y:scroll;">
-  </div>
+  <div id="display-chat" style="position:absolute; width:19.75%; right:2%; bottom:12%; height:85%; overflow-y:scroll;"></div>
 
 
 <script type="text/daimio" class="spaceseeds">
@@ -34,6 +35,7 @@
       
       @keyboard dom-on-keypress-on-body-no-forms body
       @keyboard -> {__.which |tap} -> keypress-sorter -> draw-character
+                                      keypress-sorter -> draw-character2
       
       keypress-sorter
         {__ | switch (
@@ -41,29 +43,39 @@
                 115 "{$top | subtract 1 | max 0| >$top}"
                 100 "{$left | add 1 | min 23 | >$left}"
                 119 "{$top | add 1 | min 15 | >$top}"
+                
+                106 "{$left2 | subtract 1 | max 0 | >$left2}"
+                107 "{$top2 | subtract 1 | max 0| >$top2}"
+                108 "{$left2 | add 1 | min 23 | >$left2}"
+                105 "{$top2 | add 1 | min 15 | >$top2}"
               ) 
         | run}
       
-      $top 15
-      
-      $left 0
+      $top 11
+      $left 5
+      $top2 11
+      $left2 9
       
       // CHAT THING
-      @chat dom-set-text 
+      //@chat dom-set-text 
       @chatbox dom-on-submit
       @display-chat dom-set-html
+      @scroll-chat dom-scrolly display-chat
       @message dom-set-value
       
       make-chat-work
         { __ | >$chat.#-0 }
         
       decorate-messages
+        <div style="height:100%;"><p style="bottom:0px; position:absolute;">Welcome to Tile Town!!!</p></div>
         {begin list | merge data $chat}
-          <p>{_message}</p>
+          <p><b>{_user}:</b> {_message}</p>
         {end list}
 
       @chatbox -> make-chat-work -> decorate-messages -> @display-chat
+                                    decorate-messages -> {wait 200} -> @scroll-chat
       @chatbox -> {""} -> @message
+      @init -> decorate-messages
       
       
       // IMAGE MAP
@@ -122,11 +134,13 @@
       @init -> make-image-map -> map-munger
       @create-overlay -> make-image-map2 -> map-munger2
       @init -> draw-character
+      @init -> draw-character2
       
       // OUTPUT
       @display dom-set-html 
       @display-overlay dom-set-html
       @display-character dom-set-html
+      @display-character2 dom-set-html
 
       // DO SOMETHING
       draw
@@ -158,11 +172,15 @@
       draw-character
          <img src="http://www.robbyduguay.com/Pictures/lilhenry.png" height="64" width="64" style="position:absolute; top:{$top | subtract from 15 | times 64}px; left:{$left | times 64}px"> 
 
+      draw-character2
+          <img src="http://www.robbyduguay.com/Pictures/liljennie.png" height="64" width="64" style="position:absolute; top:{$top2 | subtract from 15 | times 64}px; left:{$left2 | times 64}px">
+
       map-munger -> draw -> @display
       
       map-munger2 -> draw-overlay -> @display-overlay
       
       draw-character -> @display-character
+      draw-character2 -> @display-character2
 
   </script>
 
@@ -194,6 +212,15 @@
           event.preventDefault()  //        maybe use a port param to allow passthru
           self.enter(D.scrub_var(event))
         }, false)
+      }
+    })
+    
+    D.import_port_flavour('dom-scrolly', {
+      dir: 'out',
+      outside_exit: function(ship) {
+        var self = this
+        var el = document.getElementById(this.settings.thing)
+        el.scrollTop = 1000000
       }
     })
     
